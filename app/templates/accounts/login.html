@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Вход в аккаунт</h2>
+                    <form action="#" method="POST">
+                        {% csrf_token %}
+
+                        <div style="color: red !important;" class="col-md-12 form-group p_star">
+                                            {{ form.non_field_errors }}
+                        </div>
+
+                        {% for f in form %}
+                        {% if forloop.last %}
+                        {% else %}
+                        <div class="col-md-12 form-group p_star" style="margin-bottom: 20px;">
+                            {{ f }}
+                        </div>
+                        <div class="col-md-12 form-group p_star" style="margin-bottom: 20px;">
+                            <div style="color: red !important;" class=form-error">{{ f.errors }}</div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                        <div class="col-md-12 form-group">
+                            <div class="creat_account d-flex align-items-center" style="margin-bottom: 20px;">
+                                {{ form.remember_me }}
+                                <label for="{{ form.remember_me.id_for_label }}">Remember me</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Войти</button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a href="{% url 'register' %}">Регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
