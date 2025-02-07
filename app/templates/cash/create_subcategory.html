@@ -2,17 +2,18 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
+
+{% include 'include/_directory_nav.html' %}
+<div class="col-md-9 mt-5">
     <h2>Создание Подкатегории</h2>
 
     <!-- Форма для подкатегории -->
     <form method="POST" id="subcategory-form">
         {% csrf_token %}
         {{ subcategory_form.as_p }}
-        <button type="submit" class="btn btn-primary">Создать подкатегорию</button>
+        <button type="submit" class="btn btn-primary">Создать</button>
     </form>
 
-    <h3 class="mt-4">Создать новую категорию</h3>
     <!-- Кнопка для открытия модального окна создания категории -->
     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCategoryModal">+ Создать категорию</button>
 
@@ -55,6 +56,8 @@
             </div>
         </div>
     </div>
+</div>
+</div>
 </div>
 
 <!-- Подключаем Bootstrap JS и jQuery -->

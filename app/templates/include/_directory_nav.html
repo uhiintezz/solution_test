@@ -1,0 +1,20 @@
+<div class="container-fluid">
+    <div class="row">
+        <!-- Левое меню -->
+        <div class="col-md-3 bg-light p-3" style="min-height: 100vh;">
+            <h4>Меню</h4>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="{% url 'status_list' %}" class="nav-link {% if request.path == '/status_list/' or request.path == '/status_add/' %}active{% endif %}">Статусы</a>
+                </li>
+                <li>
+                    <a href="{% url 'type_list' %}" class="nav-link {% if request.path == '/type_list' or request.path == '/type_add/' %}active{% endif %}">Типы</a>
+                </li>
+                <li>
+                    <a href="{% url 'category_list' %}" class="nav-link {% if request.path == '/category_list/' or request.path == '/create_category/' %}active{% endif %}">Категории</a>
+                </li>
+                <li>
+                    <a href="{% url 'subcategory_list' %}" class="nav-link {% if request.path == '/subcategory_list/' or request.path == '/create_subcategory/' %}active{% endif %}">Подкатегории</a>
+                </li>
+            </ul>
+        </div>

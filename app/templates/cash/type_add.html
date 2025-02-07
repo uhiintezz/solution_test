@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'include/_directory_nav.html' %}
+<div class="col-md-9 mt-5">
+<div class="container mt-4">
+    <h1 class="mb-4">Добавить Тип</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+
+    <a href="{% url 'type_list' %}" class="btn btn-secondary mt-3">Отменить</a>
+</div>
+
+
+</div>
+</div>
+{% endblock content %}

@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+{% include 'include/_main_nav.html' %}
+<div class="col-md-9 mt-5">
+    <h1>Редактировать запись</h1>
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Название записи</label>
+                {{ form.name }}
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Статус</label>
+                {{ form.status }}
+            </div>
+
+            <div class="mb-3">
+                <label for="type" class="form-label">Тип</label>
+                {{ form.type }}
+            </div>
+
+            <div class="mb-3">
+                <label for="category" class="form-label">Категория</label>
+                {{ form.category }}
+            </div>
+
+            <div class="mb-3">
+                <label for="subcategory" class="form-label">Подкатегория</label>
+                {{ form.subcategory }}
+            </div>
+
+            <div class="mb-3">
+                <label for="write_comment" class="form-label">Комментарий</label>
+                {{ form.write_comment }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+
+        <a href="{% url 'record_list' %}" class="btn btn-secondary mt-3">Отменить</a>
+</div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let typeSelect = document.getElementById("id_type");
+    let categorySelect = document.getElementById("id_category");
+    let subcategorySelect = document.getElementById("id_subcategory");
+
+    // Пре-выбор значений для редактирования
+    let typeId = "{{ type_id }}";  // Тип, если он уже выбран
+    let categoryId = "{{ category_id }}";  // Категория, если она уже выбрана
+    let subcategoryId = "{{ subcategory_id }}";  // Подкатегория, если она уже выбрана
+
+    // Изначально блокируем подкатегорию
+    subcategorySelect.disabled = true;
+
+    // Проверка, если тип уже выбран
+    if (typeId) {
+        typeSelect.value = typeId;
+        categorySelect.disabled = false; // Разблокируем поле категории
+        updateCategories(typeId, categoryId);  // Загружаем категории, если тип выбран
+    }
+
+    // Проверка, если категория уже выбрана, загружаем подкатегории
+    if (categoryId) {
+        updateSubcategories(categoryId, subcategoryId);
+    }
+
+    // Слушаем изменение типа
+    typeSelect.addEventListener("change", function () {
+        let typeId = this.value;
+        categorySelect.innerHTML = '<option value="">Загрузка...</option>';
+        subcategorySelect.innerHTML = '<option value="">Сначала выберите категорию</option>';
+        subcategorySelect.disabled = true;
+
+        if (typeId) {
+            fetch(`/ajax/get_categories/?type_id=${typeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    categorySelect.innerHTML = '<option value="">Выберите категорию</option>';
+                    data.forEach(category => {
+                        categorySelect.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+                    });
+                    categorySelect.disabled = false; // Разблокируем категорию, если тип выбран
+                    if (categoryId) categorySelect.value = categoryId;
+                });
+        } else {
+            categorySelect.innerHTML = '<option value="">Сначала выберите тип</option>';
+            categorySelect.disabled = true; // Отключаем категорию, если тип не выбран
+        }
+    });
+
+    // Слушаем изменение категории
+    categorySelect.addEventListener("change", function () {
+        let categoryId = this.value;
+        subcategorySelect.innerHTML = '<option value="">Загрузка...</option>';
+
+        if (categoryId) {
+            fetch(`/ajax/get_subcategories/?category_id=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subcategorySelect.innerHTML = '<option value="">Выберите подкатегорию</option>';
+                    data.forEach(subcategory => {
+                        subcategorySelect.innerHTML += `<option value="${subcategory.id}">${subcategory.name}</option>`;
+                    });
+                    subcategorySelect.disabled = false;  // Разблокируем подкатегорию
+                    if (subcategoryId) subcategorySelect.value = subcategoryId;  // Выбираем подкатегорию
+                });
+        } else {
+            subcategorySelect.innerHTML = '<option value="">Сначала выберите категорию</option>';
+            subcategorySelect.disabled = true;  // Оставляем подкатегорию заблокированной
+        }
+    });
+
+    // Функции обновления категорий и подкатегорий
+    function updateCategories(typeId, selectedCategoryId) {
+        fetch(`/ajax/get_categories/?type_id=${typeId}`)
+            .then(response => response.json())
+            .then(data => {
+                categorySelect.innerHTML = '<option value="">Выберите категорию</option>';
+                data.forEach(category => {
+                    categorySelect.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+                });
+                categorySelect.disabled = false;  // Убираем блокировку категории
+                if (selectedCategoryId) categorySelect.value = selectedCategoryId;  // Выбираем уже выбранную категорию
+            });
+    }
+
+    function updateSubcategories(categoryId, selectedSubcategoryId) {
+        fetch(`/ajax/get_subcategories/?category_id=${categoryId}`)
+            .then(response => response.json())
+            .then(data => {
+                subcategorySelect.innerHTML = '<option value="">Выберите подкатегорию</option>';
+                data.forEach(subcategory => {
+                    subcategorySelect.innerHTML += `<option value="${subcategory.id}">${subcategory.name}</option>`;
+                });
+                subcategorySelect.disabled = false;  // Разблокируем подкатегорию
+                if (selectedSubcategoryId) subcategorySelect.value = selectedSubcategoryId;  // Выбираем подкатегорию
+            });
+    }
+});
+</script>
+{% endblock content %}

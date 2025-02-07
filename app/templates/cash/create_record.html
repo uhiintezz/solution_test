@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+{% include 'include/_main_nav.html' %}
+        <!-- Форма справа -->
+        <div class="col-md-9 mt-5">
+            <h2>Создание записи</h2>
+            <form id="recordForm" method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Название записи</label>
+                    {{ form.name }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Статус</label>
+                    {{ form.status }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="type" class="form-label">Тип</label>
+                    {{ form.type }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="category" class="form-label">Категория</label>
+                    {{ form.category }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="subcategory" class="form-label">Подкатегория</label>
+                    {{ form.subcategory }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="write_comment" class="form-label">Комментарий</label>
+                    {{ form.write_comment }}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Сохранить запись</button>
+            </form>
+            <div id="successMessage" class="alert alert-success mt-3 d-none"></div>
+            <div id="errorMessage" class="alert alert-danger mt-3 d-none"></div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let typeSelect = document.getElementById("id_type");
+    let categorySelect = document.getElementById("id_category");
+    let subcategorySelect = document.getElementById("id_subcategory");
+
+    // Инициализация для отключения категорий и подкатегорий
+    categorySelect.disabled = true;
+    subcategorySelect.disabled = true;
+
+    // Слушаем изменение типа
+    typeSelect.addEventListener("change", function () {
+        let typeId = this.value;
+        categorySelect.innerHTML = '<option value="">Загрузка...</option>';
+        subcategorySelect.innerHTML = '<option value="">Сначала выберите категорию</option>';
+        subcategorySelect.disabled = true;
+
+        if (typeId) {
+            fetch(`/ajax/get_categories/?type_id=${typeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    categorySelect.innerHTML = '<option value="">Выберите категорию</option>';
+                    data.forEach(category => {
+                        categorySelect.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+                    });
+                    categorySelect.disabled = false; // Разблокируем категорию
+                });
+        } else {
+            categorySelect.innerHTML = '<option value="">Сначала выберите тип</option>';
+            categorySelect.disabled = true; // Отключаем категорию
+        }
+    });
+
+    // Слушаем изменение категории
+    categorySelect.addEventListener("change", function () {
+        let categoryId = this.value;
+        subcategorySelect.innerHTML = '<option value="">Загрузка...</option>';
+
+        if (categoryId) {
+            fetch(`/ajax/get_subcategories/?category_id=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subcategorySelect.innerHTML = '<option value="">Выберите подкатегорию</option>';
+                    data.forEach(subcategory => {
+                        subcategorySelect.innerHTML += `<option value="${subcategory.id}">${subcategory.name}</option>`;
+                    });
+                    subcategorySelect.disabled = false; // Разблокируем подкатегорию
+                });
+        } else {
+            subcategorySelect.innerHTML = '<option value="">Сначала выберите категорию</option>';
+            subcategorySelect.disabled = true; // Отключаем подкатегорию
+        }
+    });
+
+    // Обработчик отправки формы
+    document.getElementById("recordForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        let formData = new FormData(this);
+
+        fetch("{% url 'create_record' %}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById("successMessage").textContent = data.message;
+                document.getElementById("successMessage").classList.remove("d-none");
+                this.reset();
+            } else {
+                document.getElementById("errorMessage").textContent = "Ошибка! Проверьте вводимые данные.";
+                document.getElementById("errorMessage").classList.remove("d-none");
+            }
+        });
+    });
+});
+</script>
+
+
+
+{% endblock content %}

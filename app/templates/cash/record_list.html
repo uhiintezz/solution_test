@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+{% include 'include/_main_nav.html' %}
+<div class="col-md-9 mt-5">
+<h1>Мои записи</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Статус</th>
+                <th>Тип</th>
+                <th>Категория</th>
+                <th>Подкатегория</th>
+                <th>Дата создания</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+                <tr>
+                    <td>{{ record.name }}</td>
+                    <td>{{ record.status }}</td>
+                    <td>{{ record.type }}</td>
+                    <td>{{ record.category }}</td>
+                    <td>{{ record.subcategory }}</td>
+                    <td>{{ record.created_at }}</td>
+                    <td>
+                        <a href="{% url 'record_edit' record.id %}" class="btn btn-primary">Редактировать</a>
+                        <form action="{% url 'record_delete' record.id %}" method="POST" style="display:inline;"
+                              onsubmit="return confirm('Вы уверены, что хотите удалить эту запись?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'create_record' %}" class="btn btn-primary">Создать запись</a>
+    </div>
+</div>
+{% endblock content %}

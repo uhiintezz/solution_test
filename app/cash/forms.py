@@ -1,10 +1,13 @@
 from django import forms
-from .models import Category, Subcategory, Type
+from .models import Category, Subcategory, Type, Record, Status
 
 class TypeForm(forms.ModelForm):
     class Meta:
         model = Type
         fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
 
 class CategoryForm(forms.ModelForm):
@@ -29,3 +32,82 @@ class SubcategoryForm(forms.ModelForm):
         empty_label="Выберите категорию",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
+
+
+class StatusForm(forms.ModelForm):
+    class Meta:
+        model = Status
+        fields = ['name',]  # Укажите поля, которые вы хотите редактировать
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class TypesForm(forms.ModelForm):
+    class Meta:
+        model = Type
+        fields = ['name',]  # Укажите поля, которые вы хотите редактировать
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class RecordsForm(forms.ModelForm): #на создание записи
+    class Meta:
+        model = Record
+        fields = ['name', 'status', 'type', 'category', 'subcategory', 'write_comment']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'type': forms.Select(attrs={'class': 'form-select'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'subcategory': forms.Select(attrs={'class': 'form-select'}),
+            'write_comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Можно добавить динамическую выборку категорий и подкатегорий
+        self.fields['category'].queryset = Category.objects.none()
+        self.fields['subcategory'].queryset = Subcategory.objects.none()
+
+        if 'type' in self.data:
+            try:
+                type_id = int(self.data.get('type'))
+                self.fields['category'].queryset = Category.objects.filter(type_id=type_id).order_by('name')
+            except (ValueError, TypeError):
+                pass
+
+        if 'category' in self.data:
+            try:
+                category_id = int(self.data.get('category'))
+                self.fields['subcategory'].queryset = Subcategory.objects.filter(category_id=category_id).order_by('name')
+            except (ValueError, TypeError):
+                pass
+
+        self.fields['write_comment'].required = False
+
+
+class RecordForm(forms.ModelForm): #на редактирование записи
+    class Meta:
+        model = Record
+        fields = ['name', 'status', 'type', 'category', 'subcategory', 'write_comment']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'type': forms.Select(attrs={'class': 'form-select'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'subcategory': forms.Select(attrs={'class': 'form-select'}),
+            'write_comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+
+class SubcategorysForm(forms.ModelForm): #на редактирование Subcategory
+    class Meta:
+        model = Subcategory
+        fields = ['name', 'category']  # Здесь указаны поля, которые мы хотим редактировать
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+        }

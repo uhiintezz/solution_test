@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% include 'include/_directory_nav.html' %}
+<div class="col-md-9 mt-5">
+    <div class="col-md-9 mt-5">
+    <h1>Редактировать подкатегорию</h1>
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+
+    <a href="{% url 'subcategory_list' %}" class="btn btn-secondary mt-3">Отменить</a>
+</div>
+
+
+</div>
+</div>
+{% endblock content %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'include/_directory_nav.html' %}
+<div class="col-md-9 mt-5">
+<div class="container mt-4">
+    <h1 class="mb-4">Список Типов</h1>
+
+    <!-- Таблица для отображения типов -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Действия</th> <!-- Добавим колонку для кнопок -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for type in types %}
+                <tr>
+                    <td>{{ type.name }}</td>
+                    <td>
+                        <!-- Кнопки редактировать и удалить -->
+                        <a href="{% url 'type_edit' type.id %}" class="btn btn-primary btn-sm">Редактировать</a>
+                        <a href="{% url 'type_delete' type.id %}" class="btn btn-danger btn-sm"
+                           onclick="return confirm('Вы уверены, что хотите удалить этот тип?');">Удалить</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">Типов нет</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'type_add' %}" class="btn btn-primary mb-3">Добавить тип</a>
+</div>
+
+
+
+</div>
+</div>
+{% endblock content %}

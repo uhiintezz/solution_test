@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% include 'include/_directory_nav.html' %}
+<div class="col-md-9 mt-5">
+    <div class="container mt-4">
+        <h1 class="mb-4">Список Подкатегорий</h1>
+
+        <ul class="list-group">
+            {% for category in categories %}
+                <li class="list-group-item">
+                    <h4>{{ category.name }}</h4>
+
+                    <ul class="list-group ml-3">
+                        {% for subcategory in category.subcategories.all %}
+                            <li class="list-group-item">
+                                {{ subcategory.name }}
+
+                                <!-- Кнопки редактировать и удалить -->
+                                <div class="btn-group" role="group" aria-label="Actions">
+                                    <a href="{% url 'subcategory_edit' subcategory.id %}" class="btn btn-primary btn-sm">Редактировать</a>
+
+                                    <form action="{% url 'subcategory_delete' subcategory.id %}" method="POST" style="display:inline;"
+                                          onsubmit="return confirm('Вы уверены, что хотите удалить эту подкатегорию?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">Подкатегорий нет</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% empty %}
+                <li class="list-group-item">Категорий нет</li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'create_subcategory' %}" class="btn btn-primary mb-3">Добавить подкатегорию</a>
+    </div>
+</div>
+
+    </div>
+</div>
+{% endblock content %}

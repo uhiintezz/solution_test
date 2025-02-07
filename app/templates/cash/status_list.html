@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'include/_directory_nav.html' %}
+<div class="col-md-9 mt-5">
+    <div class="container mt-4">
+    <h1 class="mb-4">Список Статусов</h1>
+
+    <!-- Таблица для отображения статусов -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Действия</th> <!-- Добавим колонку для кнопок -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for status in statuses %}
+                <tr>
+                    <td>{{ status.name }}</td>
+                    <td>{{ status.description }}</td>
+                    <td>
+                        <!-- Кнопки редактировать и удалить -->
+                        <a href="{% url 'status_edit' status.id %}" class="btn btn-primary btn-sm">Редактировать</a>
+                        <a href="{% url 'status_delete' status.id %}" class="btn btn-danger btn-sm"
+                           onclick="return confirm('Вы уверены, что хотите удалить этот статус?');">Удалить</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Статусов нет</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'status_add' %}" class="btn btn-primary mb-3">Добавить статус</a>
+</div>
+
+</div>
+</div>
+
+
+{% endblock content %}
