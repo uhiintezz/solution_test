@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib import messages
+from django.utils.dateparse import parse_date
+
 
 from .models import *
 from .forms import (
@@ -14,15 +17,11 @@ from .forms import (
     RecordForm,
     StatusForm,
     TypesForm,
-    SubcategorysForm
 )
 
 # Create your views here.
 
 @login_required
-def home(request):
-    return render(request, 'cash/index.html')
-
 def create_subcategory(request):
     if request.method == 'POST':
         subcategory_form = SubcategoryForm(request.POST)
@@ -42,7 +41,7 @@ def create_subcategory(request):
         'category_form': category_form,
         'type_form': type_form
     })
-
+@login_required
 def create_categories(request):
     if request.method == 'POST':
         category_form = CategoryForm(request.POST)
@@ -62,7 +61,7 @@ def create_categories(request):
         'type_form': type_form
     })
 
-
+@login_required
 def create_type(request):
     if request.method == 'POST':
         type_form = TypeForm(request.POST)
@@ -79,7 +78,7 @@ def create_type(request):
         type_form = TypeForm()
     return JsonResponse({'success': False})
 
-
+@login_required
 def create_category(request):
     try:
         if request.method == 'POST':
@@ -112,8 +111,7 @@ def create_category(request):
         return JsonResponse({'success': False, 'message': 'Произошла непредвиденная ошибка'})
 
 
-
-
+@login_required
 def create_record(request):
     if request.method == "POST":
         form = RecordsForm(request.POST)
@@ -142,7 +140,7 @@ def get_subcategories(request):
     return JsonResponse(list(subcategories), safe=False)
 
 
-class StatusListView(ListView):
+class StatusListView(LoginRequiredMixin, ListView):
     model = Status
     template_name = 'cash/status_list.html'  # Шаблон для отображения списка статусов
     context_object_name = 'statuses'
@@ -151,7 +149,7 @@ class StatusListView(ListView):
         # Фильтруем статусы, чтобы возвращать только те, которые принадлежат текущему пользователю
         return Status.objects.filter(user=self.request.user)
 
-class StatusCreateView(CreateView):
+class StatusCreateView(LoginRequiredMixin, CreateView):
     model = Status
     fields = ['name', ]  # Укажите поля, которые будут в форме
     template_name = 'cash/status_add.html'
@@ -165,7 +163,7 @@ class StatusCreateView(CreateView):
 
 
 
-class TypeListView(ListView):
+class TypeListView(LoginRequiredMixin, ListView):
     model = Type
     template_name = 'cash/type_list.html'  # Шаблон для отображения списка типов
     context_object_name = 'types'
@@ -174,7 +172,7 @@ class TypeListView(ListView):
         # Фильтруем типы, чтобы возвращать только те, которые принадлежат текущему пользователю
         return Type.objects.filter(user=self.request.user)
 
-class TypeCreateView(CreateView):
+class TypeCreateView(LoginRequiredMixin, CreateView):
     model = Type
     fields = ['name', ]  # Укажите поля, которые будут в форме
     template_name = 'cash/type_add.html'
@@ -187,7 +185,7 @@ class TypeCreateView(CreateView):
 
 
 
-class StatusUpdateView(UpdateView):
+class StatusUpdateView(LoginRequiredMixin, UpdateView):
     model = Status
     form_class = StatusForm  # Используем форму для редактирования статуса
     template_name = 'cash/status_edit.html'
@@ -216,7 +214,7 @@ def status_delete(request, pk):
     return redirect('status_list')
 
 
-class TypeUpdateView(UpdateView):
+class TypeUpdateView(LoginRequiredMixin, UpdateView):
     model = Type
     form_class = TypesForm  # Используем форму для редактирования типа
     template_name = 'cash/type_edit.html'
@@ -245,7 +243,7 @@ def type_delete(request, pk):
     return redirect('type_list')
 
 
-class RecordListView(ListView):
+class RecordListView(LoginRequiredMixin, ListView):
     model = Record
     template_name = 'cash/record_list.html'  # Путь к шаблону
     context_object_name = 'records'  # Контекст, который будет доступен в шаблоне
@@ -263,6 +261,15 @@ class RecordUpdateView(UpdateView):
     def get_object(self):
         obj = get_object_or_404(Record, id=self.kwargs['pk'], user=self.request.user)
         return obj
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        print(obj)  # Печатает объект, который будет передан в форму
+        return super().get(request, *args, **kwargs)
+    def form_valid(self, form):
+        print(form.cleaned_data)  # Отладочная информация о данных формы
+        print(form.errors)  # Отладочная информация об ошибках формы
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('record_list')
@@ -282,7 +289,7 @@ def record_delete(request, pk):
 
 
 
-class SubcategoryListView(ListView):
+class SubcategoryListView(LoginRequiredMixin, ListView):
     model = Category
     template_name = 'cash/subcategory_list.html'
     context_object_name = 'categories'
@@ -291,7 +298,7 @@ class SubcategoryListView(ListView):
         categories = Category.objects.filter(user=self.request.user).prefetch_related('subcategories')
         return categories
 
-class SubcategoryUpdateView(UpdateView):
+class SubcategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Subcategory
     form_class = SubcategoryForm
     template_name = 'cash/subcategory_edit.html'
@@ -320,7 +327,7 @@ def subcategory_delete(request, pk):
     return redirect('subcategory_list')
 
 
-class CategoryListView(ListView):
+class CategoryListView(LoginRequiredMixin, ListView):
     model = Type
     template_name = 'cash/category_list.html'
     context_object_name = 'types'
@@ -330,7 +337,7 @@ class CategoryListView(ListView):
         return types
 
 
-class CategoryUpdateView(UpdateView):
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Category
     form_class = CategoryForm
     template_name = 'cash/category_edit.html'
@@ -358,5 +365,81 @@ def category_delete(request, pk):
         messages.error(request, "У вас нет прав для удаления этой категории.")
 
     return redirect('category_list')
+
+
+
+# Главная страница
+
+
+@login_required
+def record_list(request):
+    status = request.GET.get('status')
+    record_type = request.GET.get('type')
+    category = request.GET.get('category')
+    subcategory = request.GET.get('subcategory')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+
+    records = Record.objects.filter(user=request.user)
+
+    # Загружаем все статусы без фильтрации
+    statuses = Status.objects.filter(user=request.user)
+
+    # Загружаем все типы, категории и подкатегории
+    types = Type.objects.filter(user=request.user)
+    categories = Category.objects.filter(user=request.user)
+    subcategories = Subcategory.objects.filter(user=request.user)
+
+    # Фильтруем записи, но не статусы
+    if status:
+        records = records.filter(status_id=status)
+
+    if record_type:
+        records = records.filter(type_id=record_type)
+        categories = categories.filter(records__type_id=record_type).distinct()
+
+    if category:
+        records = records.filter(category_id=category)
+        subcategories = subcategories.filter(category_id=category)
+
+    if subcategory:
+        records = records.filter(subcategory_id=subcategory)
+
+    if date_from:
+        records = records.filter(created_at__gte=parse_date(date_from))
+
+    if date_to:
+        records = records.filter(created_at__lte=parse_date(date_to))
+
+    context = {
+        'records': records,
+        'statuses': statuses,  # Всегда все статусы
+        'types': types,
+        'categories': categories,
+        'subcategories': subcategories
+    }
+    return render(request, 'main/record_list.html', context)
+
+
+def get_subcategorys(request):
+    category_id = request.GET.get('category_id')
+    subcategories = Subcategory.objects.filter(category_id=category_id, user=request.user)
+
+    # Формируем список подкатегорий
+    subcategories_list = [{"id": sub.id, "name": sub.name} for sub in subcategories]
+
+    return JsonResponse({'subcategories': subcategories_list})
+
+def get_types(request):
+    status_id = request.GET.get('status_id')
+    types = Type.objects.filter(records__status_id=status_id, user=request.user).distinct()
+    types_list = [{"id": t.id, "name": t.name} for t in types]
+    return JsonResponse({'types': types_list})
+
+def get_categorys(request):
+    type_id = request.GET.get('type_id')
+    categories = Category.objects.filter(records__type_id=type_id, user=request.user).distinct()
+    categories_list = [{"id": c.id, "name": c.name} for c in categories]
+    return JsonResponse({'categories': categories_list})
 
 

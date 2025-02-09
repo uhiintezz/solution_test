@@ -36,6 +36,11 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="amount" class="form-label">Сумма</label>
+                    {{ form.amount }}
+                </div>
+
+                <div class="mb-3">
                     <label for="write_comment" class="form-label">Комментарий</label>
                     {{ form.write_comment }}
                 </div>
@@ -121,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.success) {
                 document.getElementById("successMessage").textContent = data.message;
                 document.getElementById("successMessage").classList.remove("d-none");
+                window.location.href = "/record_list/"
                 this.reset();
             } else {
                 document.getElementById("errorMessage").textContent = "Ошибка! Проверьте вводимые данные.";

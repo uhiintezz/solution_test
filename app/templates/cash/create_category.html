@@ -12,11 +12,12 @@
     <form method="POST" id="category-form">
         {% csrf_token %}
         {{ category_form.as_p }}
+
         <button type="submit" class="btn btn-primary">Создать категорию</button>
     </form>
 
     <!-- Кнопка для открытия модального окна создания типа -->
-    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#createTypeModal">+ Добавить тип</button>
+    <button class="btn btn-info mt-3" data-bs-toggle="modal" data-bs-target="#createTypeModal">+ Добавить тип</button>
 
     <!-- Модальное окно для создания типа -->
     <div class="modal fade" id="createTypeModal" tabindex="-1" aria-labelledby="createTypeModalLabel" aria-hidden="true">

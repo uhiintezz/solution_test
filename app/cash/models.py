@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class Status(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -47,4 +48,8 @@ class Record(models.Model):
     subcategory = models.ForeignKey(Subcategory, related_name='records', on_delete=models.CASCADE)
     write_comment = models.TextField(max_length=500, blank=True)
     user = models.ForeignKey(User, related_name='records', on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
+    def clean(self):
+        if self.amount < 0:
+            raise ValidationError('Сумма не может быть меньше 0.')

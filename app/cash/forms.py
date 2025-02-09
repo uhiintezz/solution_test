@@ -1,5 +1,6 @@
 from django import forms
 from .models import Category, Subcategory, Type, Record, Status
+from django.core.exceptions import ValidationError
 
 class TypeForm(forms.ModelForm):
     class Meta:
@@ -14,6 +15,9 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = ['name', 'type']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
     type = forms.ModelChoiceField(
         queryset=Type.objects.all(),
@@ -25,7 +29,10 @@ class CategoryForm(forms.ModelForm):
 class SubcategoryForm(forms.ModelForm):
     class Meta:
         model = Subcategory
-        fields = ['category', 'name']
+        fields = ['name', 'category']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
@@ -38,7 +45,7 @@ class SubcategoryForm(forms.ModelForm):
 class StatusForm(forms.ModelForm):
     class Meta:
         model = Status
-        fields = ['name',]  # Укажите поля, которые вы хотите редактировать
+        fields = ['name']  # Укажите поля, которые вы хотите редактировать
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
         }
@@ -53,10 +60,10 @@ class TypesForm(forms.ModelForm):
         }
 
 
-class RecordsForm(forms.ModelForm): #на создание записи
+class RecordsForm(forms.ModelForm):
     class Meta:
         model = Record
-        fields = ['name', 'status', 'type', 'category', 'subcategory', 'write_comment']
+        fields = ['name', 'status', 'type', 'category', 'subcategory', 'write_comment', 'amount']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
@@ -64,6 +71,7 @@ class RecordsForm(forms.ModelForm): #на создание записи
             'category': forms.Select(attrs={'class': 'form-select'}),
             'subcategory': forms.Select(attrs={'class': 'form-select'}),
             'write_comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})  # Добавили поле amount
         }
 
     def __init__(self, *args, **kwargs):
@@ -89,25 +97,23 @@ class RecordsForm(forms.ModelForm): #на создание записи
         self.fields['write_comment'].required = False
 
 
-class RecordForm(forms.ModelForm): #на редактирование записи
+class RecordForm(forms.ModelForm):
     class Meta:
         model = Record
-        fields = ['name', 'status', 'type', 'category', 'subcategory', 'write_comment']
+        fields = ['name', 'status', 'type', 'category', 'subcategory', 'amount', 'write_comment']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'type': forms.Select(attrs={'class': 'form-select'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
             'subcategory': forms.Select(attrs={'class': 'form-select'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'write_comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
 
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if amount is None or amount < 0:
+            raise ValidationError('Сумма не может быть отрицательной!')
+        return amount
 
-class SubcategorysForm(forms.ModelForm): #на редактирование Subcategory
-    class Meta:
-        model = Subcategory
-        fields = ['name', 'category']  # Здесь указаны поля, которые мы хотим редактировать
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'category': forms.Select(attrs={'class': 'form-select'}),
-        }

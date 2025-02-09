@@ -11,11 +11,12 @@
     <form method="POST" id="subcategory-form">
         {% csrf_token %}
         {{ subcategory_form.as_p }}
-        <button type="submit" class="btn btn-primary">Создать</button>
+        
+        <button type="submit" class="btn btn-primary">Создать подкатегорию</button>
     </form>
 
     <!-- Кнопка для открытия модального окна создания категории -->
-    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCategoryModal">+ Создать категорию</button>
+    <button class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#createCategoryModal">+ Добавить категорию</button>
 
     <!-- Модальное окно для создания категории -->
     <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
@@ -31,7 +32,11 @@
                         {{ category_form.as_p }}
                         <!-- Кнопка для открытия модального окна добавления типа -->
                         <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#createTypeModal">+ Добавить тип</button>
-                        <button type="submit" class="btn btn-primary">Создать категорию</button>
+
+            <!-- Кнопка создания категории, теперь идет после кнопки "+ Добавить тип" с отступом mt-3 -->
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">Создать категорию</button>
+            </div>
                     </form>
                 </div>
             </div>
@@ -43,7 +48,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="createTypeModalLabel">Создание типа</h5>
+                    <h5 class="modal-title" id="createTypeModalLabel">Создание нового типа</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
@@ -65,55 +70,73 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    // Обработка создания типа через AJAX
-    $('#type-form').submit(function(event) {
-        event.preventDefault();
+// Обработка создания типа через AJAX
+$('#type-form').submit(function(event) {
+    event.preventDefault();
 
-        $.ajax({
-            url: '{% url "create_type" %}',
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(response) {
-                if (response.success) {
-                    // Добавляем новый тип в список типов категории
-                    const newType = response.type;
-                    const newTypeId = response.type_id;
-                    const newOption = $('<option>').text(newType).val(newTypeId);
-                    $('#id_type').append(newOption);
+    $.ajax({
+        url: '{% url "create_type" %}',
+        type: 'POST',
+        data: $(this).serialize(),
+        success: function(response) {
+            if (response.success) {
+                // Добавляем новый тип в список типов категории
+                const newType = response.type;
+                const newTypeId = response.type_id;
+                const newOption = $('<option>').text(newType).val(newTypeId);
+                $('#id_type').append(newOption);
 
-                    // Закрываем модальное окно для типа
-                    $('#createTypeModal').modal('hide');
-                } else {
-                    alert('Ошибка при создании типа');
-                }
+                // Закрываем модальное окно для типа
+                $('#createTypeModal').modal('hide');
+            } else {
+                alert('Ошибка при создании типа');
             }
-        });
+        }
     });
+});
 
-    // Обработка создания категории через AJAX
-    $('#category-form').submit(function(event) {
-        event.preventDefault();
+// Обработка создания категории через AJAX
+$('#category-form').submit(function(event) {
+    event.preventDefault();
 
-        $.ajax({
-            url: '{% url "create_category" %}',
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(response) {
-                if (response.success) {
-                    // Добавляем новую категорию в список категорий подкатегории
-                    const newCategory = response.category;
-                    const newCategoryId = response.category_id;
-                    const newOption = $('<option>').text(newCategory).val(newCategoryId);
-                    $('#id_category').append(newOption);
+    $.ajax({
+        url: '{% url "create_category" %}',
+        type: 'POST',
+        data: $(this).serialize(),
+        success: function(response) {
+            if (response.success) {
+                // Добавляем новую категорию в список категорий подкатегории
+                const newCategory = response.category;
+                const newCategoryId = response.category_id;
+                const newOption = $('<option>').text(newCategory).val(newCategoryId);
+                $('#id_category').append(newOption);
 
-                    // Закрываем модальное окно для категории
-                    $('#createCategoryModal').modal('hide');
-                } else {
-                    alert('Ошибка при создании категории');
-                }
+                // Закрываем модальное окно для категории
+                $('#createCategoryModal').modal('hide');
+
+                // Удаляем backdrop и класс modal-open
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+            } else {
+                alert('Ошибка при создании категории');
             }
-        });
+        }
     });
+});
+
+// Обработка закрытия модального окна для типа
+$('#createTypeModal').on('hidden.bs.modal', function () {
+    // Удаляем backdrop вручную, чтобы устранить серый экран и неактивные элементы
+    $('.modal-backdrop').remove();
+
+    // Убираем класс modal-open для body, чтобы разблокировать элементы на странице
+    $('body').removeClass('modal-open');
+
+    // Убедимся, что модальное окно для создания категории теперь откроется
+    var categoryModal = new bootstrap.Modal(document.getElementById('createCategoryModal'));
+    categoryModal.show(); // Явно показываем модальное окно
+});
+
 </script>
 
 {% endblock content %}

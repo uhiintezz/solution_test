@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from django.urls import path
+from django.urls import path, include
 
 from .views import (
-    home,
     create_subcategory,
     create_category,
     create_type,
@@ -31,13 +30,31 @@ from .views import (
     CategoryListView,
     CategoryUpdateView,
     category_delete,
-    create_categories
+    create_categories,
+
+    record_list,
+    get_subcategorys,
+    get_categorys,
+    get_types,
 )
 
 
+app_urls = [
+    path('records/', record_list, name='home')
+
+]
+
+api_urls = [
+    path('home/', include(app_urls)),
+]
 
 urlpatterns = [
-    path('home/', home, name='home'),
+    path('', include(api_urls)),
+
+    path('get_types/', get_types, name='get_types'),
+    path('get_categories/', get_categorys, name='get_categorys'),
+    path('get_subcategories/', get_subcategorys, name='get_subcategorys'),
+
     path('create_subcategory/', create_subcategory, name='create_subcategory'),
     path('create_category/', create_category, name='create_category'),
     path('create_type/', create_type, name='create_type'),

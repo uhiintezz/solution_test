@@ -19,7 +19,7 @@
                                 {{ category.name }}
 
                                 <!-- Кнопки редактировать и удалить -->
-                                <div class="btn-group" role="group" aria-label="Actions">
+                                <div class="btn-group" role="group" aria-label="Actions" style="float: right;">
                                     <a href="{% url 'category_edit' category.id %}" class="btn btn-primary btn-sm">Редактировать</a>
 
                                     <form action="{% url 'category_delete' category.id %}" method="POST" style="display:inline;"
@@ -38,7 +38,7 @@
                 <li class="list-group-item">Категорий нет</li>
             {% endfor %}
         </ul>
-        <a href="{% url 'create_categories' %}" class="btn btn-primary mb-3">Добавить категорию</a>
+        <a href="{% url 'create_categories' %}" class="btn btn-primary mb-3 mt-3">Добавить категорию</a>
     </div>
 </div>
 

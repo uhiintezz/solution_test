@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+{% include 'include/_main_nav.html' %}
+<div class="col-md-9 col-12 mt-5">
+    <h2 class="mb-4">Список записей</h2>
+
+    <!-- Форма фильтрации -->
+    <form method="GET" class="row g-3">
+    <!-- Фильтр по статусу -->
+    <div class="col-md-3">
+        <label for="status" class="form-label">Статус</label>
+        <select id="status" name="status" class="form-select">
+            <option value="">Выберите статус</option>
+            {% for stat in statuses %}
+                <option value="{{ stat.id }}" {% if request.GET.status == stat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ stat.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Фильтр по типу -->
+    <div class="col-md-3">
+        <label for="type" class="form-label">Тип</label>
+        <select id="type" name="type" class="form-select">
+            <option value="">Выберите тип</option>
+            {% for t in types %}
+                <option value="{{ t.id }}" {% if request.GET.type == t.id|stringformat:"s" %}selected{% endif %}>
+                    {{ t.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Фильтр по категории -->
+    <div class="col-md-3">
+        <label for="category" class="form-label">Категория</label>
+        <select id="category" name="category" class="form-select">
+            <option value="">Выберите категорию</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Фильтр по подкатегории -->
+    <div class="col-md-3">
+        <label for="subcategory" class="form-label">Подкатегория</label>
+        <select id="subcategory" name="subcategory" class="form-select">
+            <option value="">Выберите подкатегорию</option>
+            {% for sub in subcategories %}
+                <option value="{{ sub.id }}" {% if request.GET.subcategory == sub.id|stringformat:"s" %}selected{% endif %}>
+                    {{ sub.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Дата от -->
+    <div class="col-md-3">
+        <label for="date_from" class="form-label">Дата от</label>
+        <input type="date" id="date_from" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+    </div>
+
+    <!-- Дата до -->
+    <div class="col-md-3">
+        <label for="date_to" class="form-label">Дата до</label>
+        <input type="date" id="date_to" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+    </div>
+
+    <!-- Остальные поля формы -->
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Фильтровать</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Сбросить</a>
+    </div>
+</form>
+
+    <!-- Таблица с записями -->
+    <table class="table table-striped mt-4">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Статус</th>
+            <th>Тип</th>
+            <th>Категория</th>
+            <th>Подкатегория</th>
+            <th>Сумма</th>
+            <th>Дата создания</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in records %}
+        <tr>
+            <td>{{ record.id }}</td>
+            <td>{{ record.name }}</td>
+            <td>{{ record.status.name }}</td>
+            <td>{{ record.type.name }}</td>
+            <td>{{ record.category.name }}</td>
+            <td>{{ record.subcategory.name }}</td>
+            <td>{{ record.amount }}</td>
+            <td>{{ record.created_at|date:"d.m.Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" class="text-center text-muted">Нет записей</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const typeSelect = document.getElementById("type");
+        const categorySelect = document.getElementById("category");
+        const subcategorySelect = document.getElementById("subcategory");
+
+        // Слушаем изменение типа
+        typeSelect.addEventListener("change", function() {
+            const typeId = typeSelect.value;
+            categorySelect.innerHTML = '<option value="">Выберите категорию</option>';
+            subcategorySelect.innerHTML = '<option value="">Выберите подкатегорию</option>';
+
+            if (typeId) {
+                fetch(`/get_categories/?type_id=${typeId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.categories.forEach(cat => {
+                            const option = document.createElement('option');
+                            option.value = cat.id;
+                            option.textContent = cat.name;
+                            categorySelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Ошибка загрузки категорий:', error));
+            }
+        });
+
+        // Слушаем изменение категории
+        categorySelect.addEventListener("change", function() {
+            const categoryId = categorySelect.value;
+            subcategorySelect.innerHTML = '<option value="">Выберите подкатегорию</option>';
+
+            if (categoryId) {
+                fetch(`/get_subcategories/?category_id=${categoryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.subcategories.forEach(sub => {
+                            const option = document.createElement('option');
+                            option.value = sub.id;
+                            option.textContent = sub.name;
+                            subcategorySelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Ошибка загрузки подкатегорий:', error));
+            }
+        });
+    });
+</script>
+
+</div>
+
+
+{% endblock content %}

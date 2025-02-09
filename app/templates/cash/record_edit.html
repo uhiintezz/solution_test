@@ -35,9 +35,26 @@
             </div>
 
             <div class="mb-3">
+                <label for="amount" class="form-label">Сумма</label>
+                {{ form.amount }}
+            </div>
+
+            <div class="mb-3">
                 <label for="write_comment" class="form-label">Комментарий</label>
                 {{ form.write_comment }}
             </div>
+
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field in form %}
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
 
             <button type="submit" class="btn btn-primary">Сохранить</button>
         </form>
@@ -56,9 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let typeId = "{{ type_id }}";  // Тип, если он уже выбран
     let categoryId = "{{ category_id }}";  // Категория, если она уже выбрана
     let subcategoryId = "{{ subcategory_id }}";  // Подкатегория, если она уже выбрана
-
-    // Изначально блокируем подкатегорию
-    subcategorySelect.disabled = true;
 
     // Проверка, если тип уже выбран
     if (typeId) {
