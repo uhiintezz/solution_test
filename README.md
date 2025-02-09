@@ -32,7 +32,7 @@
 
 ##### 2) Создать виртуальное окружение
 
-    cd pillowmart
+    cd solution_test
     
     python -m venv djangoenv
     
