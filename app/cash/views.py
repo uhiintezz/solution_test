@@ -19,7 +19,6 @@ from .forms import (
     TypesForm,
 )
 
-# Create your views here.
 
 @login_required
 def create_subcategory(request):
@@ -27,14 +26,14 @@ def create_subcategory(request):
         subcategory_form = SubcategoryForm(request.POST)
         if subcategory_form.is_valid():
             subcategory = subcategory_form.save(commit=False)  # Не сохраняем объект сразу
-            subcategory.user = request.user  # Привязываем текущего пользователя
+            subcategory.user = request.user
             subcategory.save()
-            return redirect('subcategory_list')  # Перенаправление на список подкатегорий
+            return redirect('subcategory_list')
     else:
         subcategory_form = SubcategoryForm()
 
-    category_form = CategoryForm()  # Форма для добавления категории
-    type_form = TypeForm()  # Форма для добавления типа
+    category_form = CategoryForm()
+    type_form = TypeForm()
 
     return render(request, 'cash/create_subcategory.html', {
         'subcategory_form': subcategory_form,
@@ -47,7 +46,7 @@ def create_categories(request):
         category_form = CategoryForm(request.POST)
         if category_form.is_valid():
             category = category_form.save(commit=False)  # Не сохраняем объект сразу
-            category.user = request.user  # Привязываем текущего пользователя
+            category.user = request.user
             category.save()
 
             return redirect('category_list')
@@ -71,8 +70,8 @@ def create_type(request):
             type.save()
             return JsonResponse({
                 'success': True,
-                'type': type.name,  # Имя категории
-                'type_id': type.id  # ID категории
+                'type': type.name,
+                'type_id': type.id
             })
     else:
         type_form = TypeForm()
@@ -142,21 +141,19 @@ def get_subcategories(request):
 
 class StatusListView(LoginRequiredMixin, ListView):
     model = Status
-    template_name = 'cash/status_list.html'  # Шаблон для отображения списка статусов
+    template_name = 'cash/status_list.html'
     context_object_name = 'statuses'
 
     def get_queryset(self):
-        # Фильтруем статусы, чтобы возвращать только те, которые принадлежат текущему пользователю
         return Status.objects.filter(user=self.request.user)
 
 class StatusCreateView(LoginRequiredMixin, CreateView):
     model = Status
-    fields = ['name', ]  # Укажите поля, которые будут в форме
+    fields = ['name', ]
     template_name = 'cash/status_add.html'
     success_url = reverse_lazy('status_list')
 
     def form_valid(self, form):
-        # Присваиваем текущего пользователя, чтобы статус был привязан к нему
         form.instance.user = self.request.user
         return super().form_valid(form)
 
@@ -165,21 +162,20 @@ class StatusCreateView(LoginRequiredMixin, CreateView):
 
 class TypeListView(LoginRequiredMixin, ListView):
     model = Type
-    template_name = 'cash/type_list.html'  # Шаблон для отображения списка типов
+    template_name = 'cash/type_list.html'
     context_object_name = 'types'
 
     def get_queryset(self):
-        # Фильтруем типы, чтобы возвращать только те, которые принадлежат текущему пользователю
         return Type.objects.filter(user=self.request.user)
 
 class TypeCreateView(LoginRequiredMixin, CreateView):
     model = Type
-    fields = ['name', ]  # Укажите поля, которые будут в форме
+    fields = ['name', ]
     template_name = 'cash/type_add.html'
     success_url = reverse_lazy('type_list')
 
     def form_valid(self, form):
-        # Присваиваем текущего пользователя, чтобы тип был привязан к нему
+
         form.instance.user = self.request.user
         return super().form_valid(form)
 
@@ -187,24 +183,21 @@ class TypeCreateView(LoginRequiredMixin, CreateView):
 
 class StatusUpdateView(LoginRequiredMixin, UpdateView):
     model = Status
-    form_class = StatusForm  # Используем форму для редактирования статуса
+    form_class = StatusForm
     template_name = 'cash/status_edit.html'
     context_object_name = 'status'
 
     def get_object(self):
-        """Получаем статус по ID и проверяем, что он принадлежит текущему пользователю."""
         obj = get_object_or_404(Status, id=self.kwargs['pk'], user=self.request.user)
         return obj
 
     def get_success_url(self):
-        """Перенаправляем на страницу со списком статусов после успешного редактирования."""
         return reverse_lazy('status_list')
 
 
 def status_delete(request, pk):
     status = get_object_or_404(Status, pk=pk)
 
-    # Проверяем, что текущий пользователь является владельцем статуса
     if status.user == request.user:
         status.delete()
         messages.success(request, "Статус успешно удален.")
@@ -216,24 +209,21 @@ def status_delete(request, pk):
 
 class TypeUpdateView(LoginRequiredMixin, UpdateView):
     model = Type
-    form_class = TypesForm  # Используем форму для редактирования типа
+    form_class = TypesForm
     template_name = 'cash/type_edit.html'
     context_object_name = 'type'
 
     def get_object(self):
-        """Получаем тип по ID и проверяем, что он принадлежит текущему пользователю."""
         obj = get_object_or_404(Type, id=self.kwargs['pk'], user=self.request.user)
         return obj
 
     def get_success_url(self):
-        """Перенаправляем на страницу со списком типов после успешного редактирования."""
         return reverse_lazy('type_list')
 
 
 def type_delete(request, pk):
     type_obj = get_object_or_404(Type, pk=pk)
 
-    # Проверяем, что текущий пользователь является владельцем типа
     if type_obj.user == request.user:
         type_obj.delete()
         messages.success(request, "Тип успешно удален.")
@@ -249,7 +239,6 @@ class RecordListView(LoginRequiredMixin, ListView):
     context_object_name = 'records'  # Контекст, который будет доступен в шаблоне
 
     def get_queryset(self):
-        """Показываем только записи текущего пользователя."""
         return Record.objects.filter(user=self.request.user).order_by('-created_at')
 
 class RecordUpdateView(UpdateView):
@@ -305,12 +294,10 @@ class SubcategoryUpdateView(LoginRequiredMixin, UpdateView):
     context_object_name = 'subcategory'
 
     def get_object(self):
-        """Получаем подкатегорию по ID и проверяем, что она принадлежит текущему пользователю."""
         obj = get_object_or_404(Subcategory, id=self.kwargs['pk'], user=self.request.user)
         return obj
 
     def get_success_url(self):
-        """Перенаправляем на страницу со списком подкатегорий после успешного редактирования."""
         return reverse_lazy('subcategory_list')
 
 
@@ -344,12 +331,10 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     context_object_name = 'category'
 
     def get_object(self):
-        """Получаем категорию по ID и проверяем, что она принадлежит текущему пользователю."""
         obj = get_object_or_404(Category, id=self.kwargs['pk'], user=self.request.user)
         return obj
 
     def get_success_url(self):
-        """Перенаправляем на страницу со списком категорий после успешного редактирования."""
         return reverse_lazy('category_list')
 
 
