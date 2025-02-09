@@ -28,7 +28,7 @@
 
 ##### 1) Клонировать репозиторий
 
-    git clone https://github.com/uhiintezz/pillow_mart.git
+    git clone https://github.com/uhiintezz/solution_test.git
 
 ##### 2) Создать виртуальное окружение
 
